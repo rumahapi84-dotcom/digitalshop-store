@@ -1,1843 +1,793 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kedai Niaga Digital & Panel Pengurusan</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font (Inter & Plus Jakarta Sans) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kedai Produk Digital</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 pointer-events-none"></div>
-
-    <!-- Navigation Header -->
-    <header class="glass-nav sticky top-0 z-40 border-b border-slate-200/80 transition-all shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo & Name (Rahsia: Klik 3 kali berturut-turut untuk buka Admin) -->
-            <div class="flex items-center gap-3 cursor-pointer select-none" onclick="handleLogoClick()" title="KedaiNiaga">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 text-white flex items-center justify-center shadow-lg shadow-brand-500/25">
-                    <i class="fa-solid fa-bag-shopping text-xl"></i>
-                </div>
-                <div>
-                    <h1 id="nav-store-name" class="font-extrabold text-xl tracking-tight text-slate-900 leading-none">KedaiNiaga</h1>
-                    <p id="nav-store-slogan" class="text-xs text-slate-500 font-medium mt-1">Kualiti Terjamin & Pantas</p>
-                </div>
-            </div>
-
-            <!-- View Switcher & Action Buttons -->
-            <div class="flex items-center gap-3">
-                <!-- Customer Mode Nav (Butang Admin tersembunyi sepenuhnya daripada pembeli) -->
-                <div id="shop-nav-actions" class="flex items-center gap-2">
-                    <button onclick="toggleCartDrawer(true)" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-2 px-4 font-semibold text-sm">
-                        <i class="fa-solid fa-cart-shopping text-brand-600"></i>
-                        <span class="hidden sm:inline">Troli</span>
-                        <span id="cart-badge" class="bg-brand-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">0</span>
-                    </button>
-                </div>
-
-                <!-- Admin Mode Nav (Hanya muncul selepas disahkan) -->
-                <div id="admin-nav-actions" class="hidden flex items-center gap-3">
-                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Admin Aktif
-                    </div>
-                    <button onclick="exitAdmin()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-red-700 text-white text-xs font-bold transition flex items-center gap-2 shadow-md">
-                        <i class="fa-solid fa-lock"></i>
-                        <span>Kunci & Log Keluar</span>
-                    </button>
-                </div>
-            </div>
+  <!-- ========================================== -->
+  <!-- 1. PAPARAN UTAMA KEDAI (UNTUK PEMBELI)     -->
+  <!-- ========================================== -->
+  <div id="buyer-app" class="flex-grow">
+    
+    <!-- Header Navigasi -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        
+        <!-- Logo Kedai (Paparan Biasa Sahaja) -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+          </div>
+          <span id="nav-store-name" class="font-bold text-lg text-slate-900 tracking-tight">Kedai Digital</span>
         </div>
+
+        <!-- Butang Troli Belian -->
+        <button onclick="toggleCartModal(true)" class="relative flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span>Troli</span>
+          <span id="cart-count-badge" class="bg-emerald-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+        </button>
+      </div>
     </header>
 
-    <!-- ========================================== -->
-    <!-- VIEW 1: HALAMAN PEMBELI (CUSTOMER VIEW)     -->
-    <!-- ========================================== -->
-    <main id="shop-view" class="flex-1 pb-20">
-        <!-- Hero Banner -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-8 md:p-14 shadow-2xl">
-                <div class="absolute -right-20 -top-20 w-80 h-80 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="relative z-10 max-w-2xl">
-                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-emerald-300 text-xs font-semibold mb-5">
-                        <i class="fa-solid fa-sparkles"></i> Pembelian Mudah & Selamat
-                    </span>
-                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4">
-                        Pilihan Produk Terbaik Terus Kepada Anda.
-                    </h2>
-                    <p class="text-slate-300 text-base md:text-lg mb-8 leading-relaxed">
-                        Pilih produk digital kegemaran anda, buat pembayaran pantas melalui FPX / Perbankan Internet, dan muat turun fail terus ke peranti anda serta-merta tanpa sebarang pautan luar.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <a href="#katalog" class="px-6 py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/30 transition flex items-center gap-2">
-                            <span>Mula Membeli</span>
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </a>
-                        <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300">
-                            <i class="fa-solid fa-bolt text-emerald-400 text-base"></i>
-                            <span>Muat Turun Terus Ke Folder Downloads</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- Banner Pengenalan -->
+    <section class="max-w-6xl mx-auto px-4 pt-10 pb-6 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-4">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Akses Fail Serta-Merta Selepas Bayaran
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-950 tracking-tight max-w-2xl mx-auto leading-tight">
+        Aset & Produk Digital Rasmi
+      </h1>
+      <p class="text-slate-600 mt-3 max-w-xl mx-auto text-sm sm:text-base">
+        Pilih fail digital yang anda perlukan. Pembayaran melalui FPX perbankan dalam talian yang pantas dan selamat.
+      </p>
+    </section>
 
-        <!-- Catalog Toolbar (Search & Filter) -->
-        <section id="katalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-                <!-- Search Input -->
-                <div class="relative flex-1">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="shop-search" oninput="filterProducts()" placeholder="Cari nama produk atau penerangan..." class="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition">
-                </div>
-
-                <!-- Category Chips -->
-                <div id="category-chips" class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-                    <!-- Injected dynamically via JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Product Grid -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Dynamic Product Cards Injected Here -->
-            </div>
-            
-            <!-- Empty State -->
-            <div id="no-products" class="hidden text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300 p-8">
-                <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-box-open"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-700 mb-1">Tiada Produk Ditemui</h3>
-                <p class="text-sm text-slate-500">Cuba ubah kata kunci carian atau pilih kategori yang lain.</p>
-            </div>
-        </section>
+    <!-- Katalog Produk Digital -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Senarai produk dijana di sini secara automatik melalui JavaScript -->
+      </div>
     </main>
+  </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 2: PANEL PENGURUSAN ADMIN              -->
-    <!-- ========================================== -->
-    <main id="admin-view" class="hidden flex-1 pb-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-            <!-- Admin Top Welcome & Tabs -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Papan Pemuka Pentadbir</h2>
-                    <p class="text-sm text-slate-500">Urus inventori, semak tempahan pembeli, dan tetapkan pembayaran tanpa sentuh kod.</p>
-                </div>
-                <!-- Admin Tabs -->
-                <div class="flex items-center gap-1.5 p-1.5 bg-slate-200/80 rounded-2xl overflow-x-auto">
-                    <button onclick="switchAdminTab('products')" id="tab-btn-products" class="admin-tab-btn active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-sm">
-                        <i class="fa-solid fa-boxes-stacked"></i> Produk
-                    </button>
-                    <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                        <i class="fa-solid fa-receipt"></i> Pesanan <span id="orders-badge-count" class="bg-brand-600 text-white px-1.5 py-0.2 rounded-full text-[10px]">0</span>
-                    </button>
-                    <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                        <i class="fa-solid fa-sliders"></i> Tetapan Kedai & FPX
-                    </button>
-                </div>
-            </div>
+  <!-- Footer Pembeli -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <p>&copy; <span id="footer-year"></span> <span id="footer-store-name">Kedai Digital</span>. Hak Cipta Terpelihara.</p>
+  </footer>
 
-            <!-- TAB 1: URUS PRODUK -->
-            <section id="admin-tab-products" class="pt-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800">Senarai Inventori Produk</h3>
-                        <p class="text-xs text-slate-500">Tambah atau kemas kini stok dan harga barangan anda.</p>
-                    </div>
-                    <button onclick="openProductModal()" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-600/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Tambah Produk Baharu</span>
-                    </button>
-                </div>
+  <!-- ========================================== -->
+  <!-- 2. MODAL TROLI & CHECKOUT PEMBELI          -->
+  <!-- ========================================== -->
+  <div id="cart-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-lg text-slate-900">Troli Pesanan</h3>
+        <button onclick="toggleCartModal(false)" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+      </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                                <tr>
-                                    <th class="py-4 px-6">Produk</th>
-                                    <th class="py-4 px-6">Kategori</th>
-                                    <th class="py-4 px-6">Harga (RM)</th>
-                                    <th class="py-4 px-6">Status Stok</th>
-                                    <th class="py-4 px-6 text-right">Tindakan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-product-table" class="divide-y divide-slate-100 font-medium">
-                                <!-- Dynamic Rows Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+      <!-- Item Troli -->
+      <div id="cart-items" class="flex-grow overflow-y-auto py-4 space-y-3 hide-scrollbar">
+        <!-- Item dimasukkan melalui JS -->
+      </div>
 
-            <!-- TAB 2: SENARAI PESANAN -->
-            <section id="admin-tab-orders" class="pt-8 hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800">Rekod Pesanan Pembeli</h3>
-                        <p class="text-xs text-slate-500">Semua butiran pesanan yang dihantar oleh pelanggan melalui laman web.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="clearAllOrders()" class="px-3.5 py-2 rounded-xl text-red-600 hover:bg-red-50 text-xs font-semibold border border-red-200 transition">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Padam Rekod Lama
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                                <tr>
-                                    <th class="py-4 px-6">No. Pesanan & Tarikh</th>
-                                    <th class="py-4 px-6">Pelanggan</th>
-                                    <th class="py-4 px-6">Kaedah Bayaran</th>
-                                    <th class="py-4 px-6">Jumlah</th>
-                                    <th class="py-4 px-6">Status</th>
-                                    <th class="py-4 px-6 text-right">Perincian</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-orders-table" class="divide-y divide-slate-100 font-medium">
-                                <!-- Dynamic Rows Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 3: TETAPAN KEDAI & PAYMENT GATEWAY -->
-            <section id="admin-tab-settings" class="pt-8 hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Left: Store Info & Admin Security -->
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="font-bold text-slate-900 mb-1 text-base flex items-center gap-2">
-                                <i class="fa-solid fa-store text-brand-600"></i> Profil Perniagaan
-                            </h4>
-                            <p class="text-xs text-slate-500 mb-5">Maklumat asas yang terpapar di halaman utama kedai.</p>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Kedai</label>
-                                    <input type="text" id="setting-store-name" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Slogan / Penerangan Ringkas</label>
-                                    <input type="text" id="setting-store-slogan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Security / Pin Code -->
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="font-bold text-slate-900 mb-1 text-base flex items-center gap-2">
-                                <i class="fa-solid fa-key text-amber-500"></i> Keselamatan Admin
-                            </h4>
-                            <p class="text-xs text-slate-500 mb-4">Tukar nama pengguna dan kata laluan akses panel pengurusan ini.</p>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Pengguna (Username)</label>
-                                    <input type="text" id="setting-admin-username" placeholder="Contoh: admin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none font-semibold">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Kata Laluan Baru (PIN)</label>
-                                    <input type="password" id="setting-admin-pin" placeholder="Contoh: admin123" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Payment Gateway FPX -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                                <div>
-                                    <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                                        <i class="fa-solid fa-credit-card text-brand-600"></i> Integrasi Payment Gateway (FPX / Perbankan Internet)
-                                    </h4>
-                                    <p class="text-xs text-slate-500 mt-0.5">Sedia untuk disambungkan bila anda sudah memilih pembekal gateway. Biarkan kosong jika belum mahu aktifkan.</p>
-                                </div>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Boleh Dikonfigurasi</span>
-                            </div>
-
-                            <div class="mt-5 space-y-5">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Penyedia Gateway</label>
-                                        <select id="setting-gateway-provider" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none bg-white">
-                                            <option value="none">-- Belum Pilih (Mod Simulasi Percuma) --</option>
-                                            <option value="toyyibpay">ToyyibPay (FPX Tempatan - Mudah & Murah)</option>
-                                            <option value="billplz">Billplz (FPX Tempatan Rasmi)</option>
-                                            <option value="senangpay">SenangPay (FPX + Kad Kredit/Debit)</option>
-                                            <option value="stripe">Stripe (Antarabangsa & Kad)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Gateway</label>
-                                        <select id="setting-gateway-status" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none bg-white">
-                                            <option value="sandbox">Mod Ujian (Sandbox / Percubaan)</option>
-                                            <option value="live">Mod Sebenar (Live Production)</option>
-                                            <option value="disabled">Ditutup Sementara</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Secret Key / API Key Gateway</label>
-                                        <input type="password" id="setting-gateway-key" placeholder="Contoh: sec_key_xxxxxxxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none font-mono">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori / Kod Koleksi (Jika ada)</label>
-                                        <input type="text" id="setting-gateway-collection" placeholder="Contoh: cat_12345 atau col_xxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none font-mono">
-                                    </div>
-                                </div>
-
-                                <div class="p-4 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs leading-relaxed flex items-start gap-3">
-                                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 text-sm"></i>
-                                    <div>
-                                        <span class="font-bold">Panduan Pengguna:</span> Bahagian ini disediakan khas supaya anda tidak perlu ubah kod bila sudah daftar ToyyibPay / Billplz kelak. Hanya salin dan tampal API Key dari portal penyedia anda di sini, tekan "Simpan Semua Tetapan", dan pembayaran FPX automatik sedia berfungsi.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Save Button & Backup -->
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                            <div class="flex items-center gap-2">
-                                <button onclick="exportDataJSON()" class="px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 transition flex items-center gap-2">
-                                    <i class="fa-solid fa-download"></i> Sandar Data (Backup)
-                                </button>
-                                <label class="px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 transition flex items-center gap-2 cursor-pointer">
-                                    <i class="fa-solid fa-upload"></i> Pulih Data (Import)
-                                    <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" class="hidden">
-                                </label>
-                            </div>
-                            <button onclick="saveAllSettings()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                <span>Simpan Semua Tetapan</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+      <!-- Borang Checkout -->
+      <div id="checkout-form-box" class="pt-4 border-t border-slate-100 space-y-3">
+        <div class="flex justify-between items-center text-base font-bold text-slate-900">
+          <span>Jumlah Bayaran:</span>
+          <span class="text-emerald-600" id="cart-total-price">RM 0.00</span>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-200 bg-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>© <span id="footer-year">2026</span> <span id="footer-store-name">KedaiNiaga</span>. Hak Cipta Terpelihara.</p>
-            <div class="flex items-center gap-4">
-                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-brand-600"></i> Pembelian Selamat & Kualiti Dijamin</span>
-            </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Penuh</label>
+          <input type="text" id="cust-name" placeholder="Ahmad Razif" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
         </div>
-    </footer>
 
-    <!-- ========================================== -->
-    <!-- MODAL: ADD / EDIT PRODUCT (ADMIN)          -->
-    <!-- ========================================== -->
-    <div id="product-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 id="product-modal-title" class="text-xl font-bold text-slate-900">Tambah Produk Baharu</h3>
-                <button onclick="closeProductModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="product-form" onsubmit="handleProductSubmit(event)" class="mt-6 space-y-4">
-                <input type="hidden" id="prod-id">
-                
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Produk Digital *</label>
-                    <input type="text" id="prod-name" required placeholder="Contoh: E-Book Formula Bisnes Online (PDF)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori / Format *</label>
-                        <input type="text" id="prod-category" required placeholder="E-Book / Template / Audio / Video" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Harga Jualan (RM) *</label>
-                        <input type="number" step="0.01" id="prod-price" required placeholder="29.00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                    </div>
-                </div>
-
-                <!-- 1. Muat Naik Gambar Cover (File Sahaja - Tiada Sebarang URL) -->
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <label class="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <i class="fa-solid fa-image text-slate-600"></i> 1. Gambar Cover Produk (Upload Terus) *
-                    </label>
-                    <div>
-                        <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer transition shadow-sm">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Pilih Gambar Dari Peranti</span>
-                            <input type="file" id="prod-image-file" accept="image/*" onchange="handleProductImageUpload(event)" class="hidden">
-                        </label>
-                    </div>
-                    <input type="hidden" id="prod-image">
-                    <div id="image-upload-preview" class="hidden flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200">
-                        <img id="preview-img-tag" src="" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
-                        <div>
-                            <span class="text-xs text-emerald-600 font-bold block"><i class="fa-solid fa-circle-check"></i> Gambar Cover Sedia Digunakan</span>
-                            <span id="preview-img-name" class="text-[11px] text-slate-400"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Muat Naik Fail Digital Sebenar (File Sahaja - Tiada Sebarang URL) -->
-                <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200/90 space-y-3">
-                    <label class="block text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                        <i class="fa-solid fa-file-arrow-up text-emerald-600"></i> 2. Fail Digital Untuk Dijual (PDF, ZIP, Video, Audio dll.) *
-                    </label>
-                    <p class="text-[11px] text-emerald-800 leading-snug">
-                        Muat naik fail terus dari telefon/komputer anda. Pembeli akan memuat turun fail ini secara automatik ke peranti mereka sebaik sahaja pembayaran selesai.
-                    </p>
-                    <div>
-                        <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition shadow-md shadow-emerald-600/20">
-                            <i class="fa-solid fa-file-circle-plus"></i>
-                            <span>Pilih Fail Produk Dari Peranti</span>
-                            <input type="file" id="prod-digital-file" onchange="handleProductDigitalFileUpload(event)" class="hidden">
-                        </label>
-                    </div>
-                    <!-- Badge Maklumat Fail -->
-                    <div id="file-upload-preview" class="hidden flex items-center justify-between p-3 bg-white rounded-xl border border-emerald-300">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-file-zipper text-sm"></i>
-                            </div>
-                            <div class="min-w-0">
-                                <div id="preview-file-name" class="text-xs font-bold text-slate-800 truncate">fail.pdf</div>
-                                <div id="preview-file-size" class="text-[10px] text-slate-400">0 KB</div>
-                            </div>
-                        </div>
-                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
-                            <i class="fa-solid fa-circle-check mr-1"></i> Sedia Dijual
-                        </span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Penerangan & Kandungan Produk Digital</label>
-                    <textarea id="prod-desc" rows="3" placeholder="Terangkan kelebihan fail, silibus, atau kandungan modul ini..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center gap-3 pt-2">
-                    <input type="checkbox" id="prod-in-stock" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500" checked>
-                    <label for="prod-in-stock" class="text-sm font-semibold text-slate-700 cursor-pointer">Status Jualan Aktif (Boleh Dibeli)</label>
-                </div>
-
-                <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                    <button type="button" onclick="closeProductModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold transition">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold shadow-md shadow-brand-600/20 transition">Simpan & Terus Jual</button>
-                </div>
-            </form>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat Emel (Untuk Terima Pengesahan)</label>
+          <input type="email" id="cust-email" placeholder="nama@email.com" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
         </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilihan Pembayaran</label>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs font-medium text-slate-700">
+            <span class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              FPX Perbankan Dalam Talian
+            </span>
+            <span class="text-slate-400 text-[10px]">Automatik</span>
+          </div>
+        </div>
+
+        <button onclick="processOrderPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-lg shadow-emerald-600/20">
+          Sahkan & Buat Bayaran
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- ========================================== -->
-    <!-- DRAWER: BAKUL PEMBELIAN (CART DRAWER)      -->
-    <!-- ========================================== -->
-    <div id="cart-drawer-backdrop" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden transition-opacity" onclick="toggleCartDrawer(false)"></div>
-    <div id="cart-drawer" class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out">
-        <!-- Cart Header -->
-        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-cart-shopping text-brand-600 text-lg"></i>
-                <h3 class="font-bold text-slate-900 text-base">Troli Pesanan Anda</h3>
+  <!-- Modal Akses / Muat Turun Fail Digital -->
+  <div id="download-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
+      <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900">Pembayaran Berjaya!</h3>
+      <p class="text-xs text-slate-500 mt-1 mb-5">Sila klik butang di bawah untuk memuat turun fail digital anda terus ke folder peranti ini.</p>
+
+      <div id="download-links-container" class="space-y-3 mb-6">
+        <!-- Butang Muat Turun Masuk Sini -->
+      </div>
+
+      <button onclick="closeDownloadModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition">
+        Selesai & Tutup
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. MODAL LOG MASUK ADMIN (HANYA #admin)    -->
+  <!-- ========================================== -->
+  <div id="admin-login-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto mb-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-950">Akses Pentadbir</h3>
+        <p class="text-xs text-slate-500">Masukkan butiran log masuk pemilik kedai</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pengguna</label>
+          <input type="text" id="admin-user-input" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kata Laluan</label>
+          <input type="password" id="admin-pass-input" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900">
+        </div>
+        <div id="admin-error-msg" class="text-xs text-rose-600 font-semibold hidden text-center"></div>
+
+        <button onclick="handleAdminLogin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm transition mt-2">
+          Sahkan & Masuk
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. PAPAN PEMUKA ADMIN                      -->
+  <!-- ========================================== -->
+  <div id="admin-dashboard" class="hidden min-h-screen bg-slate-100 flex-col">
+    <!-- Bar Atas Admin -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+        <h2 class="font-bold text-base tracking-tight">Panel Pengurusan Kedai</h2>
+      </div>
+      <button onclick="logoutAdmin()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition">
+        Kunci & Keluar
+      </button>
+    </header>
+
+    <div class="max-w-6xl w-full mx-auto p-4 sm:p-6 flex-grow space-y-6">
+      
+      <!-- Tab Menu Admin -->
+      <div class="flex gap-2 border-b border-slate-200 pb-2">
+        <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm">Katalog Produk</button>
+        <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white/60">Rekod Pesanan</button>
+        <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white/60">Tetapan & Gateway</button>
+      </div>
+
+      <!-- TAB 1: PENGURUSAN PRODUK (TIADA UPLOAD GAMBAR) -->
+      <div id="tab-content-products" class="space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-slate-900">Senarai Produk Digital</h3>
+          <button onclick="openProductModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm">
+            + Tambah Produk Baharu
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
+                <th class="p-4">Nama Produk</th>
+                <th class="p-4">Kategori</th>
+                <th class="p-4">Harga (RM)</th>
+                <th class="p-4">Status Fail</th>
+                <th class="p-4 text-right">Tindakan</th>
+              </tr>
+            </thead>
+            <tbody id="admin-products-table" class="divide-y divide-slate-100">
+              <!-- Senarai produk admin dijana melalui JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: REKOD PESANAN -->
+      <div id="tab-content-orders" class="hidden space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Pesanan Pelanggan</h3>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
+                <th class="p-4">ID & Tarikh</th>
+                <th class="p-4">Pelanggan</th>
+                <th class="p-4">Item Dibeli</th>
+                <th class="p-4">Jumlah (RM)</th>
+                <th class="p-4">Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-table" class="divide-y divide-slate-100">
+              <!-- Rekod pesanan masuk sini -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: TETAPAN KEDAI & PAYMENT GATEWAY -->
+      <div id="tab-content-settings" class="hidden bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">Tetapan Profil Kedai</h4>
+          <p class="text-xs text-slate-500 mb-4">Ubah nama kedai dan maklumat asas</p>
+          <div class="max-w-md space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Kedai</label>
+              <input type="text" id="setting-store-name" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200">
             </div>
-            <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">Keselamatan Kata Laluan Admin</h4>
+          <p class="text-xs text-slate-500 mb-4">Ubah nama pengguna atau kata laluan untuk masuk melalui /#admin</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pengguna Baru</label>
+              <input type="text" id="setting-username" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Kata Laluan Baru</label>
+              <input type="password" id="setting-password" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200">
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">Gerbang Pembayaran (Payment Gateway)</h4>
+          <p class="text-xs text-slate-500 mb-4">Sediakan kunci API bila anda telah mendaftar dengan penyedia rasmi kelak (boleh dibiarkan kosong buat masa ini)</p>
+          <div class="space-y-3 max-w-lg">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Penyedia Gerbang Pembayaran</label>
+              <select id="setting-gateway-provider" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200 bg-white">
+                <option value="toyyibpay">ToyyibPay (FPX Malaysia)</option>
+                <option value="billplz">Billplz</option>
+                <option value="stripe">Stripe</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">User Secret Key / API Key</label>
+              <input type="text" id="setting-gateway-key" placeholder="Contoh: sec_test_12345678" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveAdminSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">
+          Simpan Semua Tetapan
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH/EDIT PRODUK (TIADA RUANGAN GAMBAR) -->
+  <div id="product-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <h3 id="modal-product-title" class="font-bold text-slate-900">Tambah Produk Baharu</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <input type="hidden" id="prod-id">
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Produk</label>
+        <input type="text" id="prod-title" placeholder="Contoh: E-Book Panduan Bisnes Digital" class="w-full text-sm px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Harga (RM)</label>
+          <input type="number" id="prod-price" placeholder="39" class="w-full text-sm px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori / Format</label>
+          <select id="prod-category" class="w-full text-sm px-3 py-2 rounded-xl border border-slate-200 bg-white">
+            <option value="E-Book (PDF)">E-Book (PDF)</option>
+            <option value="Templat (ZIP)">Templat (ZIP)</option>
+            <option value="Fail Audio/Video">Audio / Video</option>
+            <option value="Aset Digital">Aset Digital</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Penerangan Ringkas</label>
+        <textarea id="prod-desc" rows="3" placeholder="Penerangan mengenai apa yang pembeli dapat..." class="w-full text-sm px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+      </div>
+
+      <!-- HANYA MUAT NAIK FAIL DIGITAL (GAMBAR DIBUANG) -->
+      <div class="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
+        <label class="block text-xs font-bold text-emerald-900">Pilih Fail Produk Sebenar (PDF / ZIP / Fail)</label>
+        <input type="file" id="prod-file" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer">
+        <p id="prod-file-status" class="text-[11px] text-slate-500">Fail ini akan terus masuk ke folder Downloads pembeli selepas bayaran disahkan.</p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeProductModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+        <button onclick="saveProduct()" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">Simpan Produk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. LOGIK SISTEM (JAVASCRIPT)               -->
+  <!-- ========================================== -->
+  <script>
+    // Inisialisasi IndexedDB untuk menyimpan fail digital bersaiz besar secara tempatan
+    let db;
+    const request = indexedDB.open('StoreDB_V2', 1);
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains('digital_files')) {
+        db.createObjectStore('digital_files', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = (e) => { db = e.target.result; };
+
+    // Simpan fail ke IndexedDB
+    function saveFileToStorage(id, fileBlob, fileName) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('digital_files', 'readwrite');
+        const store = tx.objectStore('digital_files');
+        store.put({ id, fileBlob, fileName });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(false);
+      });
+    }
+
+    // Ambil fail dari IndexedDB
+    function getFileFromStorage(id) {
+      return new Promise((resolve) => {
+        const tx = db.transaction('digital_files', 'readonly');
+        const store = tx.objectStore('digital_files');
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    // Data Permulaan (Katalog Produk Tanpa Keperluan Gambar)
+    const initialProducts = [
+      {
+        id: 'p1',
+        title: 'Panduan Asas Bisnes Digital',
+        category: 'E-Book (PDF)',
+        price: 39,
+        desc: 'Langkah demi langkah memulakan perniagaan dari rumah tanpa modal besar.',
+        fileName: 'Panduan_Bisnes_Digital.pdf'
+      },
+      {
+        id: 'p2',
+        title: 'Koleksi 100+ Templat Media Sosial',
+        category: 'Templat (ZIP)',
+        price: 49,
+        desc: 'Templat reka bentuk siap pakai untuk promosi produk harian anda.',
+        fileName: 'Templat_Media_Sosial.zip'
+      }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('my_products')) || initialProducts;
+    let orders = JSON.parse(localStorage.getItem('my_orders')) || [];
+    let settings = JSON.parse(localStorage.getItem('my_settings')) || {
+      storeName: 'Kedai Digital Rasmi',
+      adminUser: 'admin',
+      adminPass: 'admin123',
+      gatewayProvider: 'toyyibpay',
+      gatewayKey: ''
+    };
+    let cart = [];
+
+    // Kemas kini Paparan Laman Utama
+    function updateStoreIdentity() {
+      document.getElementById('nav-store-name').innerText = settings.storeName;
+      document.getElementById('footer-store-name').innerText = settings.storeName;
+      document.getElementById('footer-year').innerText = new Date().getFullYear();
+    }
+
+    // Paparkan Produk di Katalog Pembeli (Reka Bentuk Berasaskan Ikon)
+    function renderBuyerProducts() {
+      const container = document.getElementById('products-grid');
+      container.innerHTML = '';
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <!-- Ikon Badge Kategori (Ganti Gambar) -->
+            <div class="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center mb-4 shadow-sm">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div class="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold mb-2">
+              ${p.category}
+            </div>
+            <h3 class="font-bold text-slate-950 text-base leading-snug mb-1">${p.title}</h3>
+            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 mb-4">${p.desc}</p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-lg font-extrabold text-slate-950">RM ${p.price}</span>
+            <button onclick="addToCart('${p.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm">
+              + Troli
             </button>
-        </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
 
-        <!-- Cart Items List -->
-        <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-4">
-            <!-- Dynamic Cart Items Injected -->
-        </div>
+    // Troli Belian
+    function addToCart(id) {
+      const item = products.find(p => p.id === id);
+      if (!cart.some(c => c.id === id)) {
+        cart.push(item);
+        updateCartUI();
+        toggleCartModal(true);
+      } else {
+        alert('Produk ini sudah ada di dalam troli anda.');
+      }
+    }
 
-        <!-- Cart Footer -->
-        <div id="cart-footer" class="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
-            <div class="flex items-center justify-between text-sm text-slate-600">
-                <span>Jumlah Kecil:</span>
-                <span id="cart-subtotal" class="font-bold text-slate-900 text-base">RM 0.00</span>
-            </div>
-            <div class="flex items-center justify-between text-xs text-slate-500">
-                <span>Penghantaran:</span>
-                <span class="text-emerald-600 font-semibold">Percuma / Dikira kemudian</span>
-            </div>
-            <div class="pt-2">
-                <button onclick="openCheckoutModal()" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-600/25 transition flex items-center justify-center gap-2">
-                    <span>Teruskan Ke Pembayaran</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    function removeFromCart(id) {
+      cart = cart.filter(c => c.id !== id);
+      updateCartUI();
+    }
 
-    <!-- ========================================== -->
-    <!-- MODAL: BORANG CHECKOUT & PEMBAYARAN        -->
-    <!-- ========================================== -->
-    <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900">Pengesahan Pembayaran</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Sila lengkapkan butiran anda untuk akses muat turun segera.</p>
-                </div>
-                <button onclick="closeCheckoutModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+    function updateCartUI() {
+      document.getElementById('cart-count-badge').innerText = cart.length;
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
 
-            <form id="checkout-form" onsubmit="processOrder(event)" class="mt-6 space-y-5">
-                <!-- Customer Information -->
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Maklumat Pembeli</h4>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Penuh *</label>
-                            <input type="text" id="cust-name" required placeholder="Nama Pembeli" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nombor Telefon *</label>
-                            <input type="tel" id="cust-phone" required placeholder="0123456789" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Emel Sah (Pautan Sandaran & Resit) *</label>
-                        <input type="email" id="cust-email" required placeholder="contoh@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-500 outline-none">
-                        <span class="text-[11px] text-slate-400 mt-1 block">Pastikan alamat emel adalah tepat untuk rekod pembelian digital anda.</span>
-                    </div>
-                </div>
+      let total = 0;
+      cart.forEach(item => {
+        total += Number(item.price);
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs';
+        row.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-800">${item.title}</div>
+            <div class="text-emerald-600 font-semibold mt-0.5">RM ${item.price}</div>
+          </div>
+          <button onclick="removeFromCart('${item.id}')" class="text-rose-500 hover:text-rose-700 font-bold p-1">Padam</button>
+        `;
+        container.appendChild(row);
+      });
 
-                <!-- Payment Method Section (FPX / Gateway Sahaja - WhatsApp & QR Dibuang) -->
-                <div class="space-y-3 pt-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Kaedah Pembayaran (FPX & Perbankan Atas Talian)</h4>
-                    
-                    <div id="payment-instruction-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
-                        <!-- Content populated dynamically -->
-                    </div>
-                </div>
+      document.getElementById('cart-total-price').innerText = `RM ${total.toFixed(2)}`;
+    }
 
-                <!-- Order Summary Breakdown -->
-                <div class="p-4 rounded-2xl bg-slate-900 text-white flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-slate-400 block">Jumlah Perlu Dibayar:</span>
-                        <span id="checkout-total" class="text-xl font-extrabold text-emerald-400">RM 0.00</span>
-                    </div>
-                    <button type="submit" id="btn-submit-order" class="px-6 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
-                        <span>Bayar & Muat Turun Fail</span>
-                        <i class="fa-solid fa-arrow-down-to-bracket"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    function toggleCartModal(show) {
+      document.getElementById('cart-modal').classList.toggle('hidden', !show);
+      document.getElementById('cart-modal').classList.toggle('flex', show);
+    }
 
-    <!-- ========================================== -->
-    <!-- MODAL: ADMIN LOGIN (PIN PROTECTED)         -->
-    <!-- ========================================== -->
-    <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 shadow-2xl relative text-center">
-            <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto mb-4 text-xl shadow-lg">
-                <i class="fa-solid fa-shield-halved text-brand-500"></i>
-            </div>
-            <h3 class="text-xl font-bold text-slate-900 mb-1">Akses Keselamatan Admin</h3>
-            <p class="text-xs text-slate-500 mb-5">Hanya pemilik kedai yang dibenarkan masuk ke panel ini.</p>
+    // Proses Pembayaran & Muat Turun
+    async function processOrderPayment() {
+      const name = document.getElementById('cust-name').value.trim();
+      const email = document.getElementById('cust-email').value.trim();
 
-            <!-- Lockout Warning Alert (Anti-Brute Force) -->
-            <div id="auth-lockout-msg" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
-                Cubaan berlebihan! Akses disekat sementara selama <span id="lockout-timer">60</span> saat.
-            </div>
+      if (!name || !email) {
+        alert('Sila isi nama dan emel anda.');
+        return;
+      }
+      if (cart.length === 0) {
+        alert('Troli anda masih kosong.');
+        return;
+      }
 
-            <form id="admin-auth-form" onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div class="space-y-3">
-                    <div>
-                        <input type="text" id="admin-username-input" required autocomplete="username" placeholder="Nama Pengguna (Username)" class="w-full text-center px-4 py-3 rounded-xl border border-slate-200 text-sm font-semibold focus:border-brand-500 outline-none">
-                    </div>
-                    <div>
-                        <input type="password" id="admin-pin-input" required autocomplete="current-password" placeholder="Kata Laluan Pentadbir" class="w-full text-center px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold tracking-wider focus:border-brand-500 outline-none">
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-1">
-                    <button type="button" onclick="closeAdminAuth()" class="w-1/2 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition">Tutup</button>
-                    <button type="submit" id="admin-login-btn" class="w-1/2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">Log Masuk</button>
-                </div>
-            </form>
-        </div>
-    </div>
+      // Simpan pesanan
+      const newOrder = {
+        id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+        date: new Date().toLocaleDateString('ms-MY'),
+        customerName: name,
+        email: email,
+        items: [...cart],
+        total: cart.reduce((acc, cur) => acc + Number(cur.price), 0),
+        status: 'Selesai (Dibayar)'
+      };
 
-    <!-- ========================================== -->
-    <!-- MODAL: ORDER DETAILS VIEW (FOR ADMIN)      -->
-    <!-- ========================================== -->
-    <div id="order-details-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 class="text-lg font-bold text-slate-900">Perincian Pesanan Pelanggan</h3>
-                <button onclick="closeOrderDetailsModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div id="order-details-content" class="mt-4 space-y-4 text-sm">
-                <!-- Dynamically populated -->
-            </div>
-        </div>
-    </div>
+      orders.unshift(newOrder);
+      localStorage.setItem('my_orders', JSON.stringify(orders));
 
-    <!-- ========================================== -->
-    <!-- MODAL: SERAHAN AKSES DIGITAL (RESIT LIVE)  -->
-    <!-- ========================================== -->
-    <div id="order-delivery-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-center">
-            <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <h3 class="text-xl font-black text-slate-900 mb-1">Pembelian Berjaya!</h3>
-            <p class="text-xs text-slate-500 mb-5">Terima kasih atas pembelian anda. Fail digital anda sedia untuk dimuat turun ke peranti sekarang:</p>
+      // Sediakan pautan muat turun fail digital
+      const dlContainer = document.getElementById('download-links-container');
+      dlContainer.innerHTML = '';
 
-            <div id="order-delivery-items" class="text-left space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
-                <!-- Injected dynamically -->
-            </div>
+      for (const item of cart) {
+        const btn = document.createElement('button');
+        btn.className = 'w-full flex items-center justify-between px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm';
+        btn.innerHTML = `
+          <span class="truncate max-w-[200px]">${item.title}</span>
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Muat Turun Fail
+          </span>
+        `;
+        btn.onclick = () => triggerDirectDownload(item);
+        dlContainer.appendChild(btn);
+      }
 
-            <div class="flex gap-2">
-                <button onclick="closeOrderDeliveryModal()" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
-                    Selesai & Kembali Ke Kedai
-                </button>
-            </div>
-        </div>
-    </div>
+      cart = [];
+      updateCartUI();
+      toggleCartModal(false);
 
-    <!-- ========================================== -->
-    <!-- MODAL: GENERIC CONFIRMATION DIALOG         -->
-    <!-- ========================================== -->
-    <div id="confirm-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center">
-            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <h4 id="confirm-title" class="font-bold text-slate-900 text-base mb-1">Pengesahan</h4>
-            <p id="confirm-desc" class="text-xs text-slate-500 mb-6">Adakah anda pasti mahu melakukan tindakan ini?</p>
-            <div class="flex items-center gap-3">
-                <button id="confirm-cancel-btn" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">Batal</button>
-                <button id="confirm-ok-btn" class="w-1/2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition">Ya, Teruskan</button>
-            </div>
-        </div>
-    </div>
+      // Buka tetingkap muat turun
+      document.getElementById('download-modal').classList.remove('hidden');
+      document.getElementById('download-modal').classList.add('flex');
+    }
 
-    <!-- ========================================== -->
-    <!-- JAVASCRIPT APPLICATION CORE                -->
-    <!-- ========================================== -->
-    <script>
-        // --- 1. LOCAL STORAGE DEFAULT DATA & STATE ---
-        const DEFAULT_CONFIG = {
-            storeName: "DigitalHub Store",
-            storeSlogan: "Koleksi Template, E-Book & Aset Digital Berkualiti",
-            adminUsername: "admin",
-            adminPin: "admin123",
-            // Payment Gateway Placeholders (Editable through Admin Panel)
-            gatewayProvider: "none",
-            gatewayStatus: "sandbox",
-            gatewayKey: "",
-            gatewayCollection: ""
-        };
+    async function triggerDirectDownload(item) {
+      const stored = await getFileFromStorage(item.id);
+      if (stored && stored.fileBlob) {
+        const url = URL.createObjectURL(stored.fileBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = stored.fileName || 'Produk_Digital';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // Jana fail sampel jika tiada fail dimuat naik sebelumnya
+        const blob = new Blob([`Terima kasih kerana membeli ${item.title}!\nIni adalah fail digital sah dari ${settings.storeName}.`], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${item.title.replace(/\s+/g, '_')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
 
-        const DEFAULT_PRODUCTS = [
-            {
-                id: "p1",
-                name: "E-Book Panduan Lengkap Bisnes Digital 2026",
-                category: "E-Book (PDF)",
-                price: 39.00,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
-                fileName: "Panduan_Bisnes_Digital_2026.pdf",
-                fileSize: "4.2 MB",
-                desc: "120 muka surat strategi membina pendapatan digital dari rumah langkah demi langkah berserta kajian kes sebenar."
-            },
-            {
-                id: "p2",
-                name: "Koleksi 100+ Template Canva Media Sosial",
-                category: "Template Canva",
-                price: 25.00,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80",
-                fileName: "Koleksi_Template_Media_Sosial.zip",
-                fileSize: "18.5 MB",
-                desc: "Template promosi Instagram & TikTok yang sedia diedit mengikut identiti jenama anda dalam masa 5 minit."
-            },
-            {
-                id: "p3",
-                name: "Sistem Pengurusan Bisnes Notion Workspace Pro",
-                category: "Notion Template",
-                price: 49.00,
-                inStock: true,
-                image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=600&auto=format&fit=crop&q=80",
-                fileName: "Notion_Workspace_Pro_Setup.zip",
-                fileSize: "2.1 MB",
-                desc: "Susun jadual kerja, akaun kewangan, invois, dan data pelanggan dalam satu papan pemuka pintar serba lengkap."
-            }
-        ];
+    function closeDownloadModal() {
+      document.getElementById('download-modal').classList.add('hidden');
+      document.getElementById('download-modal').classList.remove('flex');
+    }
 
-        // Runtime Global State
-        let config = JSON.parse(localStorage.getItem('my_shop_config')) || DEFAULT_CONFIG;
-        let products = JSON.parse(localStorage.getItem('my_shop_products')) || DEFAULT_PRODUCTS;
-        let orders = JSON.parse(localStorage.getItem('my_shop_orders')) || [];
-        let cart = []; // [{ product, qty }]
-        let selectedCategory = 'Semua';
-
-        // Temporary holding for uploaded files in memory before saving
-        let tempDigitalFile = null;
-        let tempCoverImageBase64 = '';
-
-        // Stealth Access & Anti-Brute-Force Security
-        let logoClicks = 0;
-        let logoTimer = null;
-        let failedPinAttempts = 0;
-        let lockoutUntil = 0;
-
-        // --- PANGKALAN DATA FAIL DALAMAN (INDEXEDDB UNTUK FAIL BESAR) ---
-        const DB_NAME = 'KedaiNiagaFileDB';
-        const DB_VERSION = 1;
-        const DB_STORE = 'digital_products_files';
-
-        function openFileDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, DB_VERSION);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(DB_STORE)) {
-                        db.createObjectStore(DB_STORE, { keyPath: 'id' });
-                    }
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
+    // ==========================================
+    // 6. KAWALAN ADMIN (HANYA MELALUI #admin)
+    // ==========================================
+    function checkHashRoute() {
+      if (window.location.hash === '#admin') {
+        if (sessionStorage.getItem('isAdminLogged') === 'true') {
+          showAdminDashboard();
+        } else {
+          showAdminLoginModal();
         }
-
-        async function saveFileToDB(id, fileBlob, fileName, fileType) {
-            try {
-                const db = await openFileDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(DB_STORE, 'readwrite');
-                    const store = tx.objectStore(DB_STORE);
-                    store.put({ id, fileBlob, fileName, fileType, updatedAt: Date.now() });
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => reject(tx.error);
-                });
-            } catch (err) {
-                console.error("IndexedDB Save Error:", err);
-            }
+      } else {
+        if (sessionStorage.getItem('isAdminLogged') !== 'true') {
+          hideAdmin();
         }
-
-        async function getFileFromDB(id) {
-            try {
-                const db = await openFileDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(DB_STORE, 'readonly');
-                    const store = tx.objectStore(DB_STORE);
-                    const req = store.get(id);
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => reject(req.error);
-                });
-            } catch (err) {
-                console.error("IndexedDB Get Error:", err);
-                return null;
-            }
-        }
-
-        async function deleteFileFromDB(id) {
-            try {
-                const db = await openFileDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(DB_STORE, 'readwrite');
-                    const store = tx.objectStore(DB_STORE);
-                    store.delete(id);
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => reject(tx.error);
-                });
-            } catch (err) {
-                console.error("IndexedDB Delete Error:", err);
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (!bytes || bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // --- 2. INITIALIZATION ON WINDOW LOAD ---
-        window.onload = function() {
-            document.getElementById('footer-year').textContent = new Date().getFullYear();
-            syncStoreIdentity();
-            renderShop();
-            renderAdmin();
-            renderPaymentInstructionBox();
-            setupSecretAccessTriggers();
-            checkUrlSecretAccess();
-        };
-
-        function saveConfig() {
-            localStorage.setItem('my_shop_config', JSON.stringify(config));
-            syncStoreIdentity();
-        }
-
-        function saveProducts() {
-            localStorage.setItem('my_shop_products', JSON.stringify(products));
-        }
-
-        function saveOrders() {
-            localStorage.setItem('my_shop_orders', JSON.stringify(orders));
-        }
-
-        function syncStoreIdentity() {
-            document.getElementById('nav-store-name').textContent = config.storeName;
-            document.getElementById('nav-store-slogan').textContent = config.storeSlogan;
-            document.getElementById('footer-store-name').textContent = config.storeName;
-            document.title = `${config.storeName} | Kedai Digital Rasmi`;
-        }
-
-        // --- 3. TOAST NOTIFICATION UTILITY ---
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : 
-                            type === 'error' ? 'bg-red-600 text-white' : 
-                            'bg-slate-900 text-white';
-            const icon = type === 'success' ? 'fa-circle-check' : 
-                         type === 'error' ? 'fa-circle-exclamation' : 'fa-bell';
-
-            toast.className = `${bgClass} pointer-events-auto px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-semibold transform transition-all duration-300 translate-y-3 opacity-0`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${message}</span>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('translate-y-3', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', '-translate-y-2');
-                setTimeout(() => toast.remove(), 3200);
-            }, 3200);
-        }
-
-        // --- 4. CUSTOM CONFIRM MODAL (NO ALERT/CONFIRM) ---
-        function showConfirmModal(title, desc, onConfirm) {
-            const modal = document.getElementById('confirm-modal');
-            const titleEl = document.getElementById('confirm-title');
-            const descEl = document.getElementById('confirm-desc');
-            const cancelBtn = document.getElementById('confirm-cancel-btn');
-            const okBtn = document.getElementById('confirm-ok-btn');
-
-            titleEl.textContent = title;
-            descEl.textContent = desc;
-            modal.classList.remove('hidden');
-
-            const handleCancel = () => {
-                modal.classList.add('hidden');
-                cancelBtn.removeEventListener('click', handleCancel);
-                okBtn.removeEventListener('click', handleOk);
-            };
-
-            const handleOk = () => {
-                modal.classList.add('hidden');
-                cancelBtn.removeEventListener('click', handleCancel);
-                okBtn.removeEventListener('click', handleOk);
-                onConfirm();
-            };
-
-            cancelBtn.addEventListener('click', handleCancel);
-            okBtn.addEventListener('click', handleOk);
-        }
-
-        // --- 5. VIEW SWITCHING & SECURITY ---
-        function switchView(view) {
-            const shopView = document.getElementById('shop-view');
-            const adminView = document.getElementById('admin-view');
-            const shopNav = document.getElementById('shop-nav-actions');
-            const adminNav = document.getElementById('admin-nav-actions');
-
-            if (view === 'admin') {
-                shopView.classList.add('hidden');
-                adminView.classList.remove('hidden');
-                shopNav.classList.add('hidden');
-                adminNav.classList.remove('hidden');
-                renderAdmin();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                adminView.classList.add('hidden');
-                shopView.classList.remove('hidden');
-                adminNav.classList.add('hidden');
-                shopNav.classList.remove('hidden');
-                renderShop();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        function openAdminAuth() {
-            document.getElementById('admin-username-input').value = '';
-            document.getElementById('admin-pin-input').value = '';
-            document.getElementById('admin-auth-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-username-input').focus(), 100);
-        }
-
-        function closeAdminAuth() {
-            document.getElementById('admin-auth-modal').classList.add('hidden');
-            if (window.location.hash === '#admin') {
-                history.replaceState(null, document.title, window.location.pathname + window.location.search);
-            }
-        }
-
-        function setupSecretAccessTriggers() {
-            window.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-                    e.preventDefault();
-                    openAdminAuth();
-                }
-            });
-            window.addEventListener('hashchange', checkUrlSecretAccess);
-        }
-
-        function checkUrlSecretAccess() {
-            const isHashAdmin = window.location.hash.toLowerCase() === '#admin';
-            const isQueryAdmin = window.location.search.toLowerCase().includes('admin');
-            if (isHashAdmin || isQueryAdmin) {
-                openAdminAuth();
-            }
-        }
-
-        function handleLogoClick() {
-            logoClicks++;
-            clearTimeout(logoTimer);
-
-            if (logoClicks >= 3) {
-                logoClicks = 0;
-                openAdminAuth();
-                showToast("Pintu rahsia admin dibuka!", "info");
-            } else {
-                logoTimer = setTimeout(() => {
-                    if (logoClicks === 1) {
-                        switchView('shop');
-                    }
-                    logoClicks = 0;
-                }, 400);
-            }
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const now = Date.now();
-            if (now < lockoutUntil) {
-                const remainingSecs = Math.ceil((lockoutUntil - now) / 1000);
-                showToast(`Sila tunggu ${remainingSecs} saat lagi sebelum mencuba.`, "error");
-                return;
-            }
-
-            const usernameInput = document.getElementById('admin-username-input').value.trim();
-            const pinInput = document.getElementById('admin-pin-input').value.trim();
-
-            const validUser = (config.adminUsername || "admin").toLowerCase();
-            const validPin = config.adminPin;
-
-            if (usernameInput.toLowerCase() === validUser && pinInput === validPin) {
-                failedPinAttempts = 0;
-                document.getElementById('auth-lockout-msg').classList.add('hidden');
-                document.getElementById('admin-login-btn').disabled = false;
-                closeAdminAuth();
-                switchView('admin');
-                showToast("Selamat kembali, Pentadbir!", "success");
-            } else {
-                failedPinAttempts++;
-                document.getElementById('admin-pin-input').value = '';
-
-                if (failedPinAttempts >= 3) {
-                    lockoutUntil = Date.now() + (60 * 1000);
-                    const lockoutMsg = document.getElementById('auth-lockout-msg');
-                    const timerSpan = document.getElementById('lockout-timer');
-                    const loginBtn = document.getElementById('admin-login-btn');
-
-                    lockoutMsg.classList.remove('hidden');
-                    loginBtn.disabled = true;
-
-                    let countdown = 60;
-                    const interval = setInterval(() => {
-                        countdown--;
-                        timerSpan.textContent = countdown;
-                        if (countdown <= 0) {
-                            clearInterval(interval);
-                            lockoutMsg.classList.add('hidden');
-                            loginBtn.disabled = false;
-                            failedPinAttempts = 0;
-                        }
-                    }, 1000);
-
-                    showToast("3 kali maklumat salah! Akses disekat 60 saat.", "error");
-                } else {
-                    const remaining = 3 - failedPinAttempts;
-                    showToast(`Nama pengguna atau kata laluan salah! Baki: ${remaining} kali.`, "error");
-                }
-            }
-        }
-
-        function exitAdmin() {
-            switchView('shop');
-            if (window.location.hash === '#admin') {
-                history.replaceState(null, document.title, window.location.pathname + window.location.search);
-            }
-            showToast("Sesi pentadbir dikunci & ditutup dengan selamat.", "info");
-        }
-
-        // --- 6. CUSTOMER VIEW: RENDERING & CART LOGIC ---
-        function renderShop() {
-            renderCategoryChips();
-            filterProducts();
-            updateCartBadge();
-        }
-
-        function renderCategoryChips() {
-            const container = document.getElementById('category-chips');
-            const categories = ['Semua', ...new Set(products.map(p => p.category))];
-            
-            container.innerHTML = categories.map(cat => {
-                const isActive = cat === selectedCategory;
-                return `
-                    <button onclick="setCategory('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                        isActive 
-                        ? 'bg-slate-900 text-white shadow-sm' 
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                    }">
-                        ${cat}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function setCategory(cat) {
-            selectedCategory = cat;
-            renderCategoryChips();
-            filterProducts();
-        }
-
-        function filterProducts() {
-            const query = (document.getElementById('shop-search')?.value || '').toLowerCase();
-            const grid = document.getElementById('product-grid');
-            const noProducts = document.getElementById('no-products');
-
-            const filtered = products.filter(p => {
-                const matchesCat = selectedCategory === 'Semua' || p.category === selectedCategory;
-                const matchesQuery = p.name.toLowerCase().includes(query) || (p.desc && p.desc.toLowerCase().includes(query));
-                return matchesCat && matchesQuery;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '';
-                noProducts.classList.remove('hidden');
-                return;
-            }
-
-            noProducts.classList.add('hidden');
-            grid.innerHTML = filtered.map(prod => `
-                <div class="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col">
-                    <!-- Image Wrapper -->
-                    <div class="relative h-56 bg-slate-100 overflow-hidden">
-                        <img src="${prod.image}" alt="${prod.name}" onerror="this.src='https://placehold.co/600x400/f1f5f9/64748b?text=Produk+Digital'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[11px] font-bold text-slate-800 shadow-sm">
-                            ${prod.category}
-                        </span>
-                        ${!prod.inStock ? `
-                            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center">
-                                <span class="bg-red-500 text-white text-xs font-black tracking-wider uppercase px-4 py-1.5 rounded-full shadow-lg">Stok Habis</span>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <!-- Content -->
-                    <div class="p-5 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h3 class="font-bold text-slate-900 text-base leading-snug line-clamp-2">${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mt-2 line-clamp-2">${prod.desc || 'Tiada penerangan tambahan.'}</p>
-                            ${prod.fileName ? `
-                                <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
-                                    <i class="fa-solid fa-file-zipper"></i>
-                                    <span class="truncate max-w-[170px]">${prod.fileName}</span>
-                                    ${prod.fileSize ? `<span>(${prod.fileSize})</span>` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
-                            <div>
-                                <span class="text-[11px] text-slate-400 font-medium block">Harga</span>
-                                <span class="text-lg font-extrabold text-brand-600">RM ${prod.price.toFixed(2)}</span>
-                            </div>
-
-                            <button onclick="addToCart('${prod.id}')" ${!prod.inStock ? 'disabled' : ''} class="px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 ${
-                                prod.inStock 
-                                ? 'bg-slate-900 hover:bg-brand-600 text-white shadow-md active:scale-95' 
-                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                            }">
-                                <i class="fa-solid fa-cart-plus"></i>
-                                <span>+ Troli</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Cart Actions
-        function addToCart(prodId) {
-            const product = products.find(p => p.id === prodId);
-            if (!product || !product.inStock) return;
-
-            const existing = cart.find(item => item.product.id === prodId);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                cart.push({ product, qty: 1 });
-            }
-
-            updateCartBadge();
-            renderCartItems();
-            showToast(`"${product.name}" dimasukkan ke troli!`, 'success');
-        }
-
-        function updateCartBadge() {
-            const count = cart.reduce((acc, item) => acc + item.qty, 0);
-            document.getElementById('cart-badge').textContent = count;
-        }
-
-        function toggleCartDrawer(open) {
-            const drawer = document.getElementById('cart-drawer');
-            const backdrop = document.getElementById('cart-drawer-backdrop');
-
-            if (open) {
-                renderCartItems();
-                backdrop.classList.remove('hidden');
-                setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
-            } else {
-                drawer.classList.add('translate-x-full');
-                setTimeout(() => backdrop.classList.add('hidden'), 300);
-            }
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cart-items-container');
-            const subtotalEl = document.getElementById('cart-subtotal');
-
-            if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-center py-16 text-slate-400">
-                        <i class="fa-solid fa-basket-shopping text-4xl mb-3"></i>
-                        <p class="font-bold text-slate-700">Troli Anda Kosong</p>
-                        <p class="text-xs text-slate-400 mt-1">Pilih produk digital dari katalog untuk membeli!</p>
-                    </div>
-                `;
-                subtotalEl.textContent = 'RM 0.00';
-                return;
-            }
-
-            let subtotal = 0;
-            container.innerHTML = cart.map((item, index) => {
-                const totalItemPrice = item.product.price * item.qty;
-                subtotal += totalItemPrice;
-
-                return `
-                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        <img src="${item.product.image}" onerror="this.src='https://placehold.co/100x100'" class="w-14 h-14 object-cover rounded-xl bg-white border border-slate-200">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-xs text-slate-900 truncate">${item.product.name}</h4>
-                            <p class="text-xs font-extrabold text-brand-600 mt-0.5">RM ${item.product.price.toFixed(2)}</p>
-                            
-                            <div class="flex items-center gap-2 mt-2">
-                                <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100">-</button>
-                                <span class="text-xs font-bold text-slate-800">${item.qty}</span>
-                                <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100">+</button>
-                            </div>
-                        </div>
-                        <button onclick="removeFromCart(${index})" class="text-slate-400 hover:text-red-500 p-2 transition">
-                            <i class="fa-regular fa-trash-can text-sm"></i>
-                        </button>
-                    </div>
-                `;
-            }).join('');
-
-            subtotalEl.textContent = `RM ${subtotal.toFixed(2)}`;
-        }
-
-        function changeQty(index, delta) {
-            cart[index].qty += delta;
-            if (cart[index].qty <= 0) {
-                cart.splice(index, 1);
-            }
-            updateCartBadge();
-            renderCartItems();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartBadge();
-            renderCartItems();
-        }
-
-        // --- 7. CHECKOUT & PAYMENT GATEWAY FLOW ---
-        function openCheckoutModal() {
-            if (cart.length === 0) {
-                showToast("Troli anda masih kosong!", "error");
-                return;
-            }
-            toggleCartDrawer(false);
-
-            const total = cart.reduce((acc, item) => acc + (item.product.price * item.qty), 0);
-            document.getElementById('checkout-total').textContent = `RM ${total.toFixed(2)}`;
-            document.getElementById('checkout-modal').classList.remove('hidden');
-            renderPaymentInstructionBox();
-        }
-
-        function closeCheckoutModal() {
-            document.getElementById('checkout-modal').classList.add('hidden');
-        }
-
-        function renderPaymentInstructionBox() {
-            const instructionBox = document.getElementById('payment-instruction-box');
-            if (!instructionBox) return;
-
-            const isGatewayConfigured = config.gatewayProvider !== 'none' && config.gatewayKey.trim() !== '';
-            
-            if (isGatewayConfigured) {
-                const providerName = config.gatewayProvider.toUpperCase();
-                instructionBox.innerHTML = `
-                    <div class="font-bold text-slate-800 flex items-center gap-1.5 text-emerald-700">
-                        <i class="fa-solid fa-shield-check"></i> Pembayaran FPX (${providerName})
-                    </div>
-                    <p>Pembayaran akan diproses secara selamat melalui sambungan rasmi <strong>${providerName}</strong>.</p>
-                    <p class="text-[11px] text-slate-500 font-medium">Sebaik bayaran disahkan, fail digital anda akan terus dimuat turun ke folder Downloads peranti.</p>
-                `;
-            } else {
-                instructionBox.innerHTML = `
-                    <div class="font-bold text-slate-800 flex items-center gap-1.5 text-emerald-800">
-                        <i class="fa-solid fa-building-columns text-brand-600"></i> Perbankan Dalam Talian (FPX)
-                    </div>
-                    <p class="leading-relaxed">
-                        Sila sahkan maklumat anda untuk meneruskan pembayaran dan memuat turun fail digital anda secara serta-merta.
-                    </p>
-                `;
-            }
-        }
-
-        function processOrder(e) {
-            e.preventDefault();
-            const name = document.getElementById('cust-name').value.trim();
-            const phone = document.getElementById('cust-phone').value.trim();
-            const email = document.getElementById('cust-email').value.trim();
-            const total = cart.reduce((acc, item) => acc + (item.product.price * item.qty), 0);
-
-            if (!name || !phone || !email) {
-                showToast("Sila lengkapkan semua maklumat peribadi.", "error");
-                return;
-            }
-
-            const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-            const providerText = config.gatewayProvider !== 'none' ? `FPX (${config.gatewayProvider.toUpperCase()})` : 'FPX Online';
-            
-            const newOrder = {
-                id: orderId,
-                date: new Date().toLocaleString('ms-MY', { dateStyle: 'medium', timeStyle: 'short' }),
-                customer: { name, phone, email },
-                items: [...cart],
-                total: total,
-                method: providerText,
-                status: 'Selesai Dibayar'
-            };
-
-            orders.unshift(newOrder);
-            saveOrders();
-
-            // Selesai Bayaran & Terus Buka Serahan Fail
-            closeCheckoutModal();
-            cart = [];
-            updateCartBadge();
-            showToast(`Pembayaran #${orderId} disahkan! Membuka fail digital anda...`, "success");
-            showOrderDeliveryReceipt(newOrder);
-        }
-
-        // --- 8. ADMIN DASHBOARD & PRODUCT UPLOADS ---
-        function switchAdminTab(tabName) {
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
-                btn.classList.add('text-slate-600');
-            });
-            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
-            activeBtn.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
-            activeBtn.classList.remove('text-slate-600');
-
-            document.getElementById('admin-tab-products').classList.add('hidden');
-            document.getElementById('admin-tab-orders').classList.add('hidden');
-            document.getElementById('admin-tab-settings').classList.add('hidden');
-
-            document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
-        }
-
-        function renderAdmin() {
-            renderAdminProductsTable();
-            renderAdminOrdersTable();
-            loadSettingsForm();
-        }
-
-        function renderAdminProductsTable() {
-            const tbody = document.getElementById('admin-product-table');
-            if (products.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-400">Tiada produk didaftarkan lagi. Sila klik "Tambah Produk Baharu".</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = products.map(p => `
-                <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-4 px-6 flex items-center gap-3">
-                        <img src="${p.image}" onerror="this.src='https://placehold.co/80x80'" class="w-11 h-11 rounded-xl object-cover border border-slate-200">
-                        <div>
-                            <span class="font-bold text-slate-900 block">${p.name}</span>
-                            <span class="text-xs text-slate-400 line-clamp-1">${p.fileName ? `📁 ${p.fileName} (${p.fileSize || ''})` : (p.desc || '')}</span>
-                        </div>
-                    </td>
-                    <td class="py-4 px-6 text-slate-600">${p.category}</td>
-                    <td class="py-4 px-6 font-bold text-slate-900">RM ${p.price.toFixed(2)}</td>
-                    <td class="py-4 px-6">
-                        <button onclick="toggleProductStock('${p.id}')" class="px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                            p.inStock 
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        }">
-                            <span class="w-2 h-2 rounded-full ${p.inStock ? 'bg-emerald-500' : 'bg-red-500'}"></span>
-                            <span>${p.inStock ? 'Ada Stok' : 'Habis Stok'}</span>
-                        </button>
-                    </td>
-                    <td class="py-4 px-6 text-right space-x-2">
-                        <button onclick="editProduct('${p.id}')" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Sunting">
-                            <i class="fa-solid fa-pen-to-square text-xs"></i>
-                        </button>
-                        <button onclick="deleteProduct('${p.id}')" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition" title="Padam">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function toggleProductStock(id) {
-            const p = products.find(prod => prod.id === id);
-            if (p) {
-                p.inStock = !p.inStock;
-                saveProducts();
-                renderAdminProductsTable();
-                showToast(`Status stok "${p.name}" dikemas kini.`, 'info');
-            }
-        }
-
-        function openProductModal(isEdit = false) {
-            document.getElementById('product-form').reset();
-            document.getElementById('prod-id').value = '';
-            document.getElementById('prod-image').value = '';
-            document.getElementById('image-upload-preview').classList.add('hidden');
-            document.getElementById('file-upload-preview').classList.add('hidden');
-            tempDigitalFile = null;
-            tempCoverImageBase64 = '';
-            
-            document.getElementById('product-modal-title').textContent = isEdit ? 'Sunting Produk Digital' : 'Tambah Produk Digital Baharu';
-            document.getElementById('product-modal').classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-        }
-
-        // Direct Cover Image Upload (No URL needed)
-        function handleProductImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!file.type.startsWith('image/')) {
-                showToast("Sila pilih fail imej sahaja (PNG, JPG, WEBP).", "error");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                tempCoverImageBase64 = e.target.result;
-                document.getElementById('prod-image').value = tempCoverImageBase64;
-                const previewBox = document.getElementById('image-upload-preview');
-                const previewImg = document.getElementById('preview-img-tag');
-                const previewName = document.getElementById('preview-img-name');
-                previewImg.src = tempCoverImageBase64;
-                previewName.textContent = `${file.name} (${formatFileSize(file.size)})`;
-                previewBox.classList.remove('hidden');
-                showToast("Gambar cover berjaya dipilih!", "success");
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Direct Digital File Upload (E-Book, PDF, ZIP, Audio, etc. - No URL needed)
-        function handleProductDigitalFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            tempDigitalFile = file;
-            const previewBox = document.getElementById('file-upload-preview');
-            const previewName = document.getElementById('preview-file-name');
-            const previewSize = document.getElementById('preview-file-size');
-
-            previewName.textContent = file.name;
-            previewSize.textContent = formatFileSize(file.size);
-            previewBox.classList.remove('hidden');
-            showToast(`Fail "${file.name}" sedia untuk disimpan!`, "success");
-        }
-
-        async function handleProductSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('prod-id').value;
-            const name = document.getElementById('prod-name').value.trim();
-            const category = document.getElementById('prod-category').value.trim();
-            const price = parseFloat(document.getElementById('prod-price').value);
-            const image = document.getElementById('prod-image').value.trim();
-            const desc = document.getElementById('prod-desc').value.trim();
-            const inStock = document.getElementById('prod-in-stock').checked;
-
-            if (!id && !image) {
-                showToast("Sila pilih gambar cover produk anda dahulu.", "error");
-                return;
-            }
-
-            if (!id && !tempDigitalFile) {
-                showToast("Sila pilih fail produk digital untuk dijual.", "error");
-                return;
-            }
-
-            const prodId = id || "p_" + Date.now();
-
-            // Jika ada fail digital baru yang dimuat naik, simpan dalam IndexedDB
-            let finalFileName = '';
-            let finalFileSize = '';
-
-            if (tempDigitalFile) {
-                await saveFileToDB(prodId, tempDigitalFile, tempDigitalFile.name, tempDigitalFile.type);
-                finalFileName = tempDigitalFile.name;
-                finalFileSize = formatFileSize(tempDigitalFile.size);
-            }
-
-            if (id) {
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products[index].name = name;
-                    products[index].category = category;
-                    products[index].price = price;
-                    products[index].desc = desc;
-                    products[index].inStock = inStock;
-                    if (image) products[index].image = image;
-                    if (finalFileName) {
-                        products[index].fileName = finalFileName;
-                        products[index].fileSize = finalFileSize;
-                    }
-                    showToast("Produk digital berjaya dikemas kini!", "success");
-                }
-            } else {
-                const newProd = {
-                    id: prodId,
-                    name,
-                    category,
-                    price,
-                    image: image || 'https://placehold.co/600x400/0f172a/ffffff?text=Produk+Digital',
-                    fileName: finalFileName,
-                    fileSize: finalFileSize,
-                    desc,
-                    inStock
-                };
-                products.push(newProd);
-                showToast("Produk digital baharu sedia untuk dijual!", "success");
-            }
-
-            saveProducts();
-            closeProductModal();
-            renderAdminProductsTable();
-            renderShop();
-        }
-
-        function editProduct(id) {
-            const p = products.find(prod => prod.id === id);
-            if (!p) return;
-
-            openProductModal(true);
-            document.getElementById('prod-id').value = p.id;
-            document.getElementById('prod-name').value = p.name;
-            document.getElementById('prod-category').value = p.category;
-            document.getElementById('prod-price').value = p.price;
-            document.getElementById('prod-image').value = p.image;
-            document.getElementById('prod-desc').value = p.desc || '';
-            document.getElementById('prod-in-stock').checked = p.inStock;
-
-            if (p.image) {
-                const previewBox = document.getElementById('image-upload-preview');
-                const previewImg = document.getElementById('preview-img-tag');
-                const previewName = document.getElementById('preview-img-name');
-                previewImg.src = p.image;
-                previewName.textContent = "Gambar Cover Semasa";
-                previewBox.classList.remove('hidden');
-            }
-
-            if (p.fileName) {
-                const previewBox = document.getElementById('file-upload-preview');
-                const previewName = document.getElementById('preview-file-name');
-                const previewSize = document.getElementById('preview-file-size');
-                previewName.textContent = p.fileName;
-                previewSize.textContent = p.fileSize || "Fail sedia ada";
-                previewBox.classList.remove('hidden');
-            }
-        }
-
-        function deleteProduct(id) {
-            const p = products.find(item => item.id === id);
-            if (!p) return;
-
-            showConfirmModal(
-                "Padam Produk?",
-                `Adakah anda pasti mahu memadam produk "${p.name}" beserta failnya?`,
-                async () => {
-                    products = products.filter(item => item.id !== id);
-                    await deleteFileFromDB(id);
-                    saveProducts();
-                    renderAdminProductsTable();
-                    renderShop();
-                    showToast("Produk telah dipadam dari sistem.", "info");
-                }
-            );
-        }
-
-        // --- SISTEM MUAT TURUN TERUS KE FOLDER DOWNLOADS PERANTI ---
-        function generateDemoDownloadFile(productName) {
-            const cleanTitle = productName.replace(/[^a-zA-Z0-9_\-]/g, '_');
-            const fileContent = `%PDF-1.4
-%=====================================================
-% KEDAINIAGA DIGITAL DOWNLOAD SYSTEM (FAIL SAH)
-%=====================================================
-Produk: ${productName}
-Tarikh: ${new Date().toLocaleString('ms-MY')}
-Status Pembelian: Berjaya Disahkan
-
-Tahniah! Fail digital anda telah berjaya dimuat turun terus ke folder Downloads peranti anda.
-Terima kasih kerana membeli di kedai kami.
-%EOF`;
-
-            const blob = new Blob([fileContent], { type: 'application/pdf' });
-            const blobUrl = URL.createObjectURL(blob);
-            const downloadLink = document.createElement('a');
-            downloadLink.href = blobUrl;
-            downloadLink.download = `${cleanTitle}.pdf`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-
-            setTimeout(() => {
-                downloadLink.remove();
-                URL.revokeObjectURL(blobUrl);
-            }, 1000);
-
-            showToast(`Fail "${productName}" disimpan ke folder Downloads!`, "success");
-        }
-
-        async function triggerDeviceDownload(productId, productName) {
-            showToast(`Memulakan muat turun "${productName}"...`, "info");
-            
-            // 1. Semak fail sebenar yang dimuat naik oleh admin dalam IndexedDB
-            const stored = await getFileFromDB(productId);
-            if (stored && stored.fileBlob) {
-                const blobUrl = URL.createObjectURL(stored.fileBlob);
-                const downloadLink = document.createElement('a');
-                downloadLink.href = blobUrl;
-                downloadLink.download = stored.fileName || `${productName}.pdf`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-
-                setTimeout(() => {
-                    downloadLink.remove();
-                    URL.revokeObjectURL(blobUrl);
-                }, 2000);
-
-                showToast(`Fail "${stored.fileName || productName}" berjaya disimpan ke peranti!`, "success");
-                return;
-            }
-
-            // 2. Jika produk sampel lalai (belum ada fail upload sendiri), jana fail automatik ke Downloads
-            generateDemoDownloadFile(productName);
-        }
-
-        // --- 9. ADMIN: ORDERS MANAGEMENT ---
-        function renderAdminOrdersTable() {
-            const tbody = document.getElementById('admin-orders-table');
-            const badgeCount = document.getElementById('orders-badge-count');
-            badgeCount.textContent = orders.length;
-
-            if (orders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400">Belum ada pesanan daripada pembeli.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = orders.map((o, idx) => `
-                <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-4 px-6">
-                        <span class="font-bold text-slate-900 block">#${o.id}</span>
-                        <span class="text-xs text-slate-400">${o.date}</span>
-                    </td>
-                    <td class="py-4 px-6">
-                        <span class="font-bold text-slate-800 block">${o.customer.name}</span>
-                        <span class="text-xs text-slate-400 font-mono">${o.customer.email}</span>
-                    </td>
-                    <td class="py-4 px-6">
-                        <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold">${o.method}</span>
-                    </td>
-                    <td class="py-4 px-6 font-bold text-slate-900">RM ${o.total.toFixed(2)}</td>
-                    <td class="py-4 px-6">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                            ${o.status}
-                        </span>
-                    </td>
-                    <td class="py-4 px-6 text-right">
-                        <button onclick="viewOrderDetails(${idx})" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold transition">
-                            Lihat
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function viewOrderDetails(idx) {
-            const o = orders[idx];
-            if (!o) return;
-
-            const content = document.getElementById('order-details-content');
-            content.innerHTML = `
-                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                    <div><strong>No Pesanan:</strong> #${o.id}</div>
-                    <div><strong>Tarikh & Masa:</strong> ${o.date}</div>
-                    <div><strong>Kaedah:</strong> ${o.method}</div>
-                    <div><strong>Status:</strong> <span class="font-bold text-emerald-700">${o.status}</span></div>
-                </div>
-
-                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                    <h5 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-1">Maklumat Pelanggan</h5>
-                    <div><strong>Nama:</strong> ${o.customer.name}</div>
-                    <div><strong>Emel:</strong> <a href="mailto:${o.customer.email}" class="text-brand-600 underline font-semibold">${o.customer.email}</a></div>
-                    <div><strong>Telefon:</strong> <span class="font-mono">${o.customer.phone}</span></div>
-                </div>
-
-                <div>
-                    <h5 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Item Produk Digital</h5>
-                    <div class="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden">
-                        ${o.items.map(it => {
-                            const escapedName = it.product.name.replace(/'/g, "\\'");
-                            return `
-                                <div class="p-3 bg-white flex items-center justify-between gap-3">
-                                    <div class="min-w-0">
-                                        <div class="text-xs font-bold text-slate-900 truncate">${it.product.name} (x${it.qty})</div>
-                                        <div class="text-[11px] text-slate-400">${it.product.fileName || 'Fail sedia ada'}</div>
-                                    </div>
-                                    <button type="button" onclick="triggerDeviceDownload('${it.product.id}', '${escapedName}')" class="shrink-0 px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition flex items-center gap-1 shadow-xs">
-                                        <i class="fa-solid fa-download"></i>
-                                        <span>Download</span>
-                                    </button>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span class="font-bold text-slate-600">Jumlah Bayaran:</span>
-                    <span class="text-lg font-extrabold text-brand-600">RM ${o.total.toFixed(2)}</span>
-                </div>
-            `;
-
-            document.getElementById('order-details-modal').classList.remove('hidden');
-        }
-
-        function closeOrderDetailsModal() {
-            document.getElementById('order-details-modal').classList.add('hidden');
-        }
-
-        function clearAllOrders() {
-            if (orders.length === 0) return;
-            showConfirmModal(
-                "Kosongkan Semua Pesanan?",
-                "Tindakan ini akan memadam semua rekod tempahan lama daripada pelayar anda.",
-                () => {
-                    orders = [];
-                    saveOrders();
-                    renderAdminOrdersTable();
-                    showToast("Semua rekod pesanan telah dikosongkan.", "info");
-                }
-            );
-        }
-
-        // --- 10. ADMIN: SETTINGS & BACKUP ---
-        function loadSettingsForm() {
-            document.getElementById('setting-store-name').value = config.storeName;
-            document.getElementById('setting-store-slogan').value = config.storeSlogan;
-            document.getElementById('setting-admin-username').value = config.adminUsername || "admin";
-            document.getElementById('setting-admin-pin').value = config.adminPin;
-
-            document.getElementById('setting-gateway-provider').value = config.gatewayProvider;
-            document.getElementById('setting-gateway-status').value = config.gatewayStatus;
-            document.getElementById('setting-gateway-key').value = config.gatewayKey;
-            document.getElementById('setting-gateway-collection').value = config.gatewayCollection;
-        }
-
-        function saveAllSettings() {
-            config.storeName = document.getElementById('setting-store-name').value.trim() || "Kedai Niaga";
-            config.storeSlogan = document.getElementById('setting-store-slogan').value.trim() || "";
-            
-            const newUsername = document.getElementById('setting-admin-username').value.trim();
-            if (newUsername) config.adminUsername = newUsername;
-
-            const newPin = document.getElementById('setting-admin-pin').value.trim();
-            if (newPin) config.adminPin = newPin;
-
-            config.gatewayProvider = document.getElementById('setting-gateway-provider').value;
-            config.gatewayStatus = document.getElementById('setting-gateway-status').value;
-            config.gatewayKey = document.getElementById('setting-gateway-key').value.trim();
-            config.gatewayCollection = document.getElementById('setting-gateway-collection').value.trim();
-
-            saveConfig();
-            renderPaymentInstructionBox();
-            showToast("Tetapan kedai & gateway berjaya disimpan!", "success");
-        }
-
-        function exportDataJSON() {
-            const fullData = { config, products, orders };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `sandaran_kedai_${Date.now()}.json`);
-            dlAnchor.click();
-            dlAnchor.remove();
-            showToast("Fail sandaran JSON berjaya dimuat turun.", "success");
-        }
-
-        function importDataJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (parsed.config && parsed.products) {
-                        config = parsed.config;
-                        products = parsed.products;
-                        orders = parsed.orders || [];
-                        saveConfig();
-                        saveProducts();
-                        saveOrders();
-                        renderAdmin();
-                        renderShop();
-                        showToast("Data kedai berjaya dipulihkan!", "success");
-                    } else {
-                        showToast("Format fail sandaran tidak sah.", "error");
-                    }
-                } catch (err) {
-                    showToast("Ralat membaca fail JSON.", "error");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function showOrderDeliveryReceipt(order) {
-            const container = document.getElementById('order-delivery-items');
-            container.innerHTML = `
-                <div class="mb-2 pb-2 border-b border-slate-200">
-                    <div class="font-bold text-slate-800">No. Pesanan: #${order.id}</div>
-                    <div class="text-slate-500">Penerima: ${order.customer.name} (${order.customer.email})</div>
-                </div>
-                <div class="font-bold text-slate-700 text-[11px] uppercase tracking-wider mb-2">Fail Digital Anda (Sedia Dimuat Turun):</div>
-                <div class="space-y-3">
-                    ${order.items.map(it => {
-                        const escapedName = it.product.name.replace(/'/g, "\\'");
-                        return `
-                            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-                                <div class="flex items-center justify-between">
-                                    <div class="min-w-0 pr-2">
-                                        <span class="font-bold text-slate-900 text-xs block truncate">${it.product.name}</span>
-                                        <span class="text-[10px] text-slate-400 font-mono">${it.product.fileName || 'Fail Digital'} ${it.product.fileSize ? `(${it.product.fileSize})` : ''}</span>
-                                    </div>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Disahkan</span>
-                                </div>
-                                <div class="pt-1">
-                                    <button type="button" onclick="triggerDeviceDownload('${it.product.id}', '${escapedName}')" class="w-full py-2.5 px-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md active:scale-95 shadow-brand-500/25">
-                                        <i class="fa-solid fa-download"></i>
-                                        <span>Muat Turun Fail Terus Ke Peranti</span>
-                                    </button>
-                                </div>
-                                <p class="text-[11px] text-slate-500 leading-tight">
-                                    <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Fail akan terus disimpan ke folder "Downloads" di komputer atau telefon anda.
-                                </p>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-            document.getElementById('order-delivery-modal').classList.remove('hidden');
-        }
-
-        function closeOrderDeliveryModal() {
-            document.getElementById('order-delivery-modal').classList.add('hidden');
-        }
-    </script>
+      }
+    }
+
+    window.addEventListener('hashchange', checkHashRoute);
+    window.addEventListener('DOMContentLoaded', () => {
+      updateStoreIdentity();
+      renderBuyerProducts();
+      checkHashRoute();
+    });
+
+    function showAdminLoginModal() {
+      document.getElementById('admin-login-modal').classList.remove('hidden');
+      document.getElementById('admin-login-modal').classList.add('flex');
+      document.getElementById('admin-error-msg').classList.add('hidden');
+    }
+
+    function handleAdminLogin() {
+      const u = document.getElementById('admin-user-input').value.trim();
+      const p = document.getElementById('admin-pass-input').value.trim();
+
+      if (u === settings.adminUser && p === settings.adminPass) {
+        sessionStorage.setItem('isAdminLogged', 'true');
+        document.getElementById('admin-login-modal').classList.add('hidden');
+        document.getElementById('admin-login-modal').classList.remove('flex');
+        showAdminDashboard();
+      } else {
+        const err = document.getElementById('admin-error-msg');
+        err.innerText = 'Nama pengguna atau kata laluan tidak tepat.';
+        err.classList.remove('hidden');
+      }
+    }
+
+    function showAdminDashboard() {
+      document.getElementById('buyer-app').classList.add('hidden');
+      document.querySelector('footer').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      document.getElementById('admin-dashboard').classList.add('flex');
+      renderAdminProducts();
+      renderAdminOrders();
+      loadSettingsToInputs();
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('isAdminLogged');
+      window.location.hash = ''; // Padamkan #admin dari pautan URL
+      location.reload();
+    }
+
+    function hideAdmin() {
+      document.getElementById('buyer-app').classList.remove('hidden');
+      document.querySelector('footer').classList.remove('hidden');
+      document.getElementById('admin-dashboard').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('flex');
+    }
+
+    // Pengurusan Tab Admin
+    function switchAdminTab(tab) {
+      document.getElementById('tab-content-products').classList.toggle('hidden', tab !== 'products');
+      document.getElementById('tab-content-orders').classList.toggle('hidden', tab !== 'orders');
+      document.getElementById('tab-content-settings').classList.toggle('hidden', tab !== 'settings');
+
+      document.getElementById('tab-btn-products').className = tab === 'products' ? 'px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm' : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white/60';
+      document.getElementById('tab-btn-orders').className = tab === 'orders' ? 'px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm' : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white/60';
+      document.getElementById('tab-btn-settings').className = tab === 'settings' ? 'px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm' : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white/60';
+    }
+
+    // Senarai Produk di Admin
+    function renderAdminProducts() {
+      const tbody = document.getElementById('admin-products-table');
+      tbody.innerHTML = '';
+
+      products.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-4 font-bold text-slate-900">${p.title}</td>
+          <td class="p-4 text-slate-500">${p.category}</td>
+          <td class="p-4 font-semibold text-emerald-600">RM ${p.price}</td>
+          <td class="p-4 text-xs text-slate-500">${p.fileName ? 'Tersedia (' + p.fileName + ')' : 'Auto-Jana'}</td>
+          <td class="p-4 text-right">
+            <button onclick="deleteProduct('${p.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs">Padam</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openProductModal() {
+      document.getElementById('prod-id').value = '';
+      document.getElementById('prod-title').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-desc').value = '';
+      document.getElementById('prod-file').value = '';
+      document.getElementById('modal-product-title').innerText = 'Tambah Produk Baharu';
+      document.getElementById('product-modal').classList.remove('hidden');
+      document.getElementById('product-modal').classList.add('flex');
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.add('hidden');
+      document.getElementById('product-modal').classList.remove('flex');
+    }
+
+    async function saveProduct() {
+      const title = document.getElementById('prod-title').value.trim();
+      const price = document.getElementById('prod-price').value.trim();
+      const category = document.getElementById('prod-category').value;
+      const desc = document.getElementById('prod-desc').value.trim();
+      const fileInput = document.getElementById('prod-file');
+
+      if (!title || !price) {
+        alert('Sila isi nama dan harga produk.');
+        return;
+      }
+
+      const id = 'p_' + Date.now();
+      let fileName = '';
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileName = file.name;
+        await saveFileToStorage(id, file, fileName);
+      }
+
+      products.push({ id, title, price, category, desc, fileName });
+      localStorage.setItem('my_products', JSON.stringify(products));
+
+      closeProductModal();
+      renderAdminProducts();
+      renderBuyerProducts();
+      alert('Produk berjaya ditambah!');
+    }
+
+    function deleteProduct(id) {
+      if (confirm('Padam produk ini?')) {
+        products = products.filter(p => p.id !== id);
+        localStorage.setItem('my_products', JSON.stringify(products));
+        renderAdminProducts();
+        renderBuyerProducts();
+      }
+    }
+
+    function renderAdminOrders() {
+      const tbody = document.getElementById('admin-orders-table');
+      tbody.innerHTML = '';
+      orders.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-4"><span class="font-bold text-slate-800">${o.id}</span><br><span class="text-[11px] text-slate-400">${o.date}</span></td>
+          <td class="p-4"><span class="font-semibold text-slate-900">${o.customerName}</span><br><span class="text-xs text-slate-500">${o.email}</span></td>
+          <td class="p-4 text-xs text-slate-600">${o.items.map(i => i.title).join(', ')}</td>
+          <td class="p-4 font-bold text-emerald-600">RM ${o.total}</td>
+          <td class="p-4"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">${o.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function loadSettingsToInputs() {
+      document.getElementById('setting-store-name').value = settings.storeName;
+      document.getElementById('setting-username').value = settings.adminUser;
+      document.getElementById('setting-password').value = settings.adminPass;
+      document.getElementById('setting-gateway-provider').value = settings.gatewayProvider;
+      document.getElementById('setting-gateway-key').value = settings.gatewayKey;
+    }
+
+    function saveAdminSettings() {
+      settings.storeName = document.getElementById('setting-store-name').value.trim() || settings.storeName;
+      settings.adminUser = document.getElementById('setting-username').value.trim() || settings.adminUser;
+      settings.adminPass = document.getElementById('setting-password').value.trim() || settings.adminPass;
+      settings.gatewayProvider = document.getElementById('setting-gateway-provider').value;
+      settings.gatewayKey = document.getElementById('setting-gateway-key').value.trim();
+
+      localStorage.setItem('my_settings', JSON.stringify(settings));
+      updateStoreIdentity();
+      alert('Tetapan berjaya disimpan!');
+    }
+  </script>
 </body>
 </html>
